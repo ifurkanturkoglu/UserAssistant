@@ -23,6 +23,8 @@ public partial class MainPage : ContentPage
 	async void ListenClicked(object sender, EventArgs e){
 		Listen(cancellationToken);
 	}
+	
+
 	async void Listen(CancellationToken cancellationToken)
 	{
 		var isGranted = await speechToText.RequestPermissions(cancellationToken);
@@ -45,11 +47,31 @@ public partial class MainPage : ContentPage
 		if (recognitionResult.IsSuccessful)
 		{
 			SpeechTextLabel.Text = recognitionResult.Text;
+			List<string> words = recognitionResult.Text.Split(" ").ToList();
+			int index = words.FindIndex(word => word.Contains("aç"));
+			if (index > 0) 
+			{
+				string appName = words[index - 1];
+				int apostropheIndex = appName.IndexOf("'");
+				if (apostropheIndex != -1) 
+				{
+					appName = appName.Substring(0, apostropheIndex);
+				}
+				appName = appName.ToLower();
+
+				LaunchAppWithUri.LaunchApp(appName);
+			}
 		}
 		else
 		{
 			await Toast.Make(recognitionResult.Exception?.Message ?? "Unable to recognize speech").Show(CancellationToken.None);
 		}
 	}
+
+	
+	void OpenApp (object sender, EventArgs e){
+		LaunchAppWithUri.LaunchApp("spotify");
+	}
+
 }
 

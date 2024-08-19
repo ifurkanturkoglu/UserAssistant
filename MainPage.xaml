@@ -21,6 +21,12 @@
                 Text="Dinle" 
                 Clicked="ListenClicked"
                 HorizontalOptions="Center" />
+
+            <Button
+                Text="Aç"
+                Clicked="OpenApp"
+                HorizontalOptions="Center" 
+            />
         </VerticalStackLayout>
     </ScrollView>
 
