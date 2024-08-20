@@ -12,18 +12,19 @@ public partial class MainPage : ContentPage
 	public MainPage()
 	{
 		InitializeComponent();
-		
+
 	}
-	public MainPage(ISpeechToText _speechToText,CancellationToken cancellationToken) : this()
+	public MainPage(ISpeechToText _speechToText, CancellationToken cancellationToken) : this()
 	{
 		speechToText = _speechToText;
 		this.cancellationToken = cancellationToken;
 	}
 
-	async void ListenClicked(object sender, EventArgs e){
+	async void ListenClicked(object sender, EventArgs e)
+	{
 		Listen(cancellationToken);
 	}
-	
+
 
 	async void Listen(CancellationToken cancellationToken)
 	{
@@ -43,34 +44,57 @@ public partial class MainPage : ContentPage
 
 
 		var a = recognitionResult.Exception;
+		
 
-		if (recognitionResult.IsSuccessful)
+		PermissionStatus status = await Permissions.CheckStatusAsync<Permissions.Microphone>();
+		
+
+		if (status == PermissionStatus.Granted)
 		{
-			SpeechTextLabel.Text = recognitionResult.Text;
-			List<string> words = recognitionResult.Text.Split(" ").ToList();
-			int index = words.FindIndex(word => word.Contains("aç"));
-			if (index > 0) 
+			if (recognitionResult.IsSuccessful)
 			{
-				string appName = words[index - 1];
-				int apostropheIndex = appName.IndexOf("'");
-				if (apostropheIndex != -1) 
+				SpeechTextLabel.Text = recognitionResult.Text;
+				List<string> words = recognitionResult.Text.Split(" ").ToList();
+				int index = words.FindIndex(word => word.Contains("aç"));
+				if (index > 0)
 				{
-					appName = appName.Substring(0, apostropheIndex);
-				}
-				appName = appName.ToLower();
+					string appName = words[index - 1];
+					int apostropheIndex = appName.IndexOf("'");
+					if (apostropheIndex != -1)
+					{
+						appName = appName.Substring(0, apostropheIndex);
+					}
+					appName = appName.ToLower();
 
-				LaunchAppWithUri.LaunchApp(appName);
+					try
+					{
+						#if WINDOWS
+							appName = "epic games";
+						
+						#endif
+						LaunchAppWithUri.LaunchApp(appName,"open");
+					}
+					catch (Exception e)
+					{
+						
+						await Toast.Make(e.Message).Show();
+					}
+					
+				}
 			}
 		}
+
+
 		else
 		{
 			await Toast.Make(recognitionResult.Exception?.Message ?? "Unable to recognize speech").Show(CancellationToken.None);
 		}
 	}
 
-	
-	void OpenApp (object sender, EventArgs e){
-		LaunchAppWithUri.LaunchApp("spotify");
+
+	void OpenApp(object sender, EventArgs e)
+	{
+		LaunchAppWithUri.LaunchApp("spotify","open");
 	}
 
 }
